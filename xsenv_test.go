@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,8 +24,10 @@ func (m *MockUnmarshalService) UnmarshalService(data *json.RawMessage) error {
 
 func TestLoadEnv(t *testing.T) {
 	// Set up environment variable for testing
-	os.Setenv(EnvironmentKey, `{"VCAP_SERVICES": {"test_service": [{"name": "test"}]}}`)
-	defer os.Unsetenv(EnvironmentKey)
+	_ = os.Setenv(EnvironmentKey, `{"VCAP_SERVICES": {"test_service": [{"name": "test"}]}}`)
+	defer func() {
+		_ = os.Unsetenv(EnvironmentKey)
+	}()
 
 	env, err := LoadEnv()
 	assert.NoError(t, err)
@@ -32,7 +36,7 @@ func TestLoadEnv(t *testing.T) {
 	assert.True(t, exists)
 
 	// Test loading from default file when environment variable is not set
-	os.Unsetenv(EnvironmentKey)
+	_ = os.Unsetenv(EnvironmentKey)
 
 	// create default-env.json if it does not exist
 	if _, err := os.Stat(DefaultEnvFile); os.IsNotExist(err) {
@@ -42,7 +46,9 @@ func TestLoadEnv(t *testing.T) {
 		assert.NoError(t, err)
 		err = file.Close()
 		assert.NoError(t, err)
-		defer os.Remove(DefaultEnvFile)
+		defer func() {
+			_ = os.Remove(DefaultEnvFile)
+		}()
 	}
 
 	env, err = LoadEnv()
@@ -76,18 +82,69 @@ func TestLoadService(t *testing.T) {
 }
 
 func TestMissingFieldError(t *testing.T) {
-	err := MissingFieldError("missing_field")
-	assert.Error(t, err)
-	assert.True(t, errors.Is(err, ErrFieldMissing))
+	testCases := []struct {
+		field    string
+		expected error
+	}{
+		{"username", fmt.Errorf("%w: %s", ErrFieldMissing, "username")},
+		{"password", fmt.Errorf("%w: %s", ErrFieldMissing, "password")},
+		{"", fmt.Errorf("%w: %s", ErrFieldMissing, "")}, // Testing with an empty string
+	}
+
+	for _, tc := range testCases {
+		err := MissingFieldError(tc.field)
+		assert.True(t, errors.Is(err, ErrFieldMissing))
+		assert.Equal(t, tc.expected.Error(), err.Error())
+	}
 }
 
 func TestCheckAllFields(t *testing.T) {
-	fields := Fields{"field1": true, "field2": false}
-	err := CheckAllFields(fields)
-	assert.Error(t, err)
-	assert.True(t, errors.Is(err, ErrFieldMissing))
+	testCases := []struct {
+		name     string
+		input    Fields
+		expected error
+	}{
+		{
+			name: "All fields present",
+			input: Fields{
+				"username": true,
+				"password": true,
+			},
+			expected: nil,
+		},
+		{
+			name: "One field missing",
+			input: Fields{
+				"username": true,
+				"password": false, // this field is missing
+			},
+			expected: fmt.Errorf("%w: %s", ErrFieldMissing, "password"),
+		},
+		{
+			name: "Multiple fields missing",
+			input: Fields{
+				"username": false,
+				"password": false, // both fields are missing
+			},
+			expected: fmt.Errorf("%w: %s", ErrFieldMissing, "username, password"),
+		},
+		{
+			name:     "Empty fields map",
+			input:    Fields{},
+			expected: nil, // No fields to check, so it should not error
+		},
+	}
 
-	fields = Fields{"field1": true, "field2": true}
-	err = CheckAllFields(fields)
-	assert.NoError(t, err)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := CheckAllFields(tc.input)
+			if tc.expected == nil {
+				assert.NoError(t, err)
+			} else {
+				assert.True(t, errors.Is(err, ErrFieldMissing))
+				// Since map iteration is random, we need to compare without considering the order
+				assert.ElementsMatch(t, strings.Split(tc.expected.Error(), ": ")[1:], strings.Split(err.Error(), ": ")[1:])
+			}
+		})
+	}
 }

@@ -30,7 +30,7 @@ const (
 // ErrServiceNotFound indicates that the requested service was not found in the environment configuration.
 var (
 	ErrServiceNotFound = errors.New("service not found")
-	ErrFieldMissing    = errors.New("field missing")
+	ErrFieldMissing    = errors.New("field(s) missing")
 )
 
 // LoadEnv loads the environment configuration from environment variables if available, otherwise from the default file.
@@ -124,10 +124,14 @@ type Fields = map[string]bool
 // CheckAllFields checks if all fields in a map are set to true (present).
 // If a field is missing, it returns an error.
 func CheckAllFields(m Fields) error {
+	var missing []string
 	for name, ok := range m {
 		if !ok {
-			return MissingFieldError(name)
+			missing = append(missing, name)
 		}
+	}
+	if len(missing) > 0 {
+		return fmt.Errorf("%w: %s", ErrFieldMissing, strings.Join(missing, ", "))
 	}
 	return nil
 }
