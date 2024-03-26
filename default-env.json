@@ -1,0 +1,72 @@
+{
+    "VCAP_SERVICES": {
+        "xsuaa": [
+            {
+                "binding_guid": "a83a32b8-93b6-4e5a-b9bf-91bffc45d2c2",
+                "binding_name": null,
+                "credentials": {
+                    "apiurl": "https://api.authentication.eu12.hana.ondemand.com",
+                    "clientid": "sb-portal!t332597",
+                    "clientsecret": "6Snlir04bij+mDqVL5Yta9p6Rd4=",
+                    "credential-type": "instance-secret",
+                    "identityzone": "cf-vt-ng",
+                    "identityzoneid": "a90b3e16-cd4e-435d-a766-4d25c51440f7",
+                    "sburl": "https://internal-xsuaa.authentication.eu12.hana.ondemand.com",
+                    "serviceInstanceId": "00aeb7d2-cccf-4581-8bd1-4145d1e8954f",
+                    "subaccountid": "a90b3e16-cd4e-435d-a766-4d25c51440f7",
+                    "tenantid": "a90b3e16-cd4e-435d-a766-4d25c51440f7",
+                    "tenantmode": "dedicated",
+                    "uaadomain": "authentication.eu12.hana.ondemand.com",
+                    "url": "https://cf-vt-ng.authentication.eu12.hana.ondemand.com",
+                    "verificationkey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtEBq46SrZnAUkYtaVfwk\nYYn5DvWnOmd/rF61Y0UUe646PlvapB04ZrLY6j46DFVL7cR0U57vDiLoEp4JVgFO\naS1aWNHEjS5V3YhjkktfpaxJjsK1NE3oRW2oe4fqO8VWSk74I3YFVwO2s2Wx9+TR\nB2l0sc2k/yHV14zue3+poMWcAImqwtmVfgcsppx2zNAAJ+vB9w1bGEKa/UelRs7F\ng1orXxT6DFUqNM48YV2C7Clkdxlcg64xcAo0Lm/loqPi/B6V3G/mdv3tMTlYFAq1\nFsO0CtGdyTu4D4ScMzpjHMmA/DCQt6pfuUYnw8uTCu+2AxNn6/An4WJQA0SN4LQX\nYQIDAQAB\n-----END PUBLIC KEY-----",
+                    "xsappname": "portal!t332597",
+                    "zoneid": "a90b3e16-cd4e-435d-a766-4d25c51440f7"
+                },
+                "instance_guid": "00aeb7d2-cccf-4581-8bd1-4145d1e8954f",
+                "instance_name": "portal-uaa",
+                "label": "xsuaa",
+                "name": "portal-uaa",
+                "plan": "application",
+                "provider": null,
+                "syslog_drain_url": null,
+                "tags": [
+                    "xsuaa"
+                ],
+                "volume_mounts": []
+            }
+        ]
+    },
+    "VCAP_APPLICATION": {
+        "application_id": "a26604b4-16e0-452a-add1-3e3f0682d0a6",
+        "application_name": "portal-frontend",
+        "application_uris": [
+            "admin-vt-portal-app.internal.cfapps.eu12.hana.ondemand.com"
+        ],
+        "cf_api": "https://api.cf.eu12.hana.ondemand.com",
+        "limits": {
+            "fds": 32768
+        },
+        "name": "portal-frontend",
+        "organization_id": "83730c78-72f0-48b2-8ad2-b9dbe5993b84",
+        "organization_name": "Vocational Training_cf-vt-ng",
+        "space_id": "debf2398-6e64-4b36-97fa-a9db5c6731b4",
+        "space_name": "admin-vt-portal",
+        "uris": [
+            "admin-vt-portal-app.internal.cfapps.eu12.hana.ondemand.com"
+        ],
+        "users": null
+    },
+    "HELLO": "world",
+    "destinations": [
+        {
+            "name": "portal-frontend",
+            "url": "http://localhost:3000",
+            "forwardAuthToken": true
+        },
+        {
+            "name": "portal-backend",
+            "url": "http://127.0.0.1:8080",
+            "forwardAuthToken": true
+        }
+    ]
+}
